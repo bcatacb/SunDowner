@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Suno Downloader</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>♫ Suno<span>DL</span></h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="download">⬇ Download</button>
+        <button class="nav-btn" data-tab="queue">📋 Queue</button>
+        <button class="nav-btn" data-tab="log">📝 Log</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-indicator" id="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Download Tab -->
+      <section class="tab-panel active" id="tab-download">
+        <!-- Token Section -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Connection</h2>
+          </div>
+          <div class="card-body">
+            <label>Session Token</label>
+            <div class="input-row">
+              <input type="password" id="token-input" placeholder="Paste token here (starts with eyJ...)">
+              <button class="btn btn-sm" id="btn-get-token">Get Token</button>
+            </div>
+            <div class="token-help" id="token-help" style="display:none;">
+              <p>On <strong>suno.com</strong>, open console (<code>F12</code> → Console) and paste:</p>
+              <div class="code-block" id="code-block">
+                <code>window.Clerk.session.getToken().then(t => prompt('Copy this token:', t))</code>
+                <button class="btn-copy" id="btn-copy-code">Copy</button>
+              </div>
+              <p class="hint">Copy the token from the popup that appears, paste it above.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source Section -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Source</h2>
+            <div class="source-btns">
+              <button class="btn btn-sm active" id="btn-src-library" data-source="library">My Library</button>
+              <button class="btn btn-sm" id="btn-src-workspace" data-source="workspace">Workspace</button>
+              <button class="btn btn-sm" id="btn-src-playlist" data-source="playlist">Playlist</button>
+            </div>
+          </div>
+          <div class="card-body" id="source-detail" style="display:none;">
+            <select id="source-select">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Format & Organization -->
+        <div class="card">
+          <div class="card-header"><h2>Output</h2></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div>
+                <label>Formats</label>
+                <div class="checkbox-group">
+                  <label class="check"><input type="checkbox" id="fmt-mp3" checked> MP3</label>
+                  <label class="check"><input type="checkbox" id="fmt-mp4"> MP4 (video)</label>
+                  <label class="check"><input type="checkbox" id="fmt-wav"> WAV (lossless)</label>
+                </div>
+              </div>
+              <div>
+                <label>Organize by</label>
+                <select id="organize-select">
+                  <option value="song">Song folders (recommended)</option>
+                  <option value="month">Month → Song folders</option>
+                  <option value="playlist">Playlist/Workspace → Song folders</option>
+                  <option value="flat">Flat (no folders)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:12px;">
+              <div>
+                <label>Options</label>
+                <div class="checkbox-group">
+                  <label class="check"><input type="checkbox" id="opt-metadata" checked> Embed metadata</label>
+                  <label class="check"><input type="checkbox" id="opt-lyrics" checked> Save lyrics (.txt)</label>
+                  <label class="check"><input type="checkbox" id="opt-cover" checked> Save cover art</label>
+                  <label class="check"><input type="checkbox" id="opt-smart-resume"> Smart resume</label>
+                </div>
+              </div>
+              <div>
+                <label>Download folder</label>
+                <div class="input-row">
+                  <input type="text" id="folder-display" readonly placeholder="Choose a folder...">
+                  <button class="btn btn-sm" id="btn-folder">Browse</button>
+                </div>
+                <div style="margin-top:8px;">
+                  <label>Parallel downloads</label>
+                  <input type="number" id="concurrent-input" value="3" min="1" max="10" style="width:60px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+          <div class="card-header"><h2>Filters</h2></div>
+          <div class="card-body">
+            <div class="checkbox-group inline">
+              <label class="check"><input type="checkbox" id="flt-liked"> Liked only</label>
+              <label class="check"><input type="checkbox" id="flt-hide-stems" checked> Hide stems</label>
+              <label class="check"><input type="checkbox" id="flt-stems-only"> Stems only</label>
+              <label class="check"><input type="checkbox" id="flt-public"> Public only</label>
+              <label class="check"><input type="checkbox" id="flt-trashed"> Include trashed</label>
+              <label class="check"><input type="checkbox" id="flt-hide-studio" checked> Hide studio clips</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+          <button class="btn btn-primary btn-lg" id="btn-preload">🔍 Scan Library</button>
+          <button class="btn btn-accent btn-lg" id="btn-download" disabled>⬇ Download All</button>
+          <button class="btn btn-danger btn-lg" id="btn-stop" style="display:none;">✕ Stop</button>
+        </div>
+      </section>
+
+      <!-- Queue Tab -->
+      <section class="tab-panel" id="tab-queue">
+        <div class="card" style="height:100%;">
+          <div class="card-header">
+            <h2>Song Queue</h2>
+            <span class="badge" id="queue-count">0 songs</span>
+          </div>
+          <div class="card-body queue-body">
+            <div class="queue-list" id="queue-list">
+              <div class="empty-state">
+                <p>No songs loaded yet.</p>
+                <p class="hint">Click "Scan Library" to fetch your songs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Log Tab -->
+      <section class="tab-panel" id="tab-log">
+        <div class="card" style="height:100%;">
+          <div class="card-header">
+            <h2>Activity Log</h2>
+            <button class="btn btn-sm" id="btn-clear-log">Clear</button>
+          </div>
+          <div class="card-body">
+            <div class="log-output" id="log-output"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Bar (always visible at bottom) -->
+      <div class="progress-footer" id="progress-footer" style="display:none;">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-stats">
+          <span id="progress-text">0 / 0</span>
+          <span id="progress-percent">0%</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

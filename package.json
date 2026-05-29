@@ -1,0 +1,13 @@
+{
+  "name": "suno-downloader",
+  "version": "1.0.0",
+  "description": "Download all songs from your Suno AI library",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^33.0.0",
+    "node-id3": "^0.2.6"
+  }
+}
