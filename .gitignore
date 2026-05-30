@@ -11,5 +11,4 @@ uploads/
 venv/
 *.egg-info/
 .pytest_cache/
-*.pyc
 .DS_Store
