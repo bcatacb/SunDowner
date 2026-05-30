@@ -1,13 +1,35 @@
 {
-  "name": "suno-downloader",
+  "name": "sundowner",
   "version": "1.0.0",
-  "description": "Download all songs from your Suno AI library",
+  "description": "Download your entire Suno AI library with lyrics, genre, metadata, and organized folders",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.sundowner.app",
+    "productName": "SunDowner",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**/*",
+      "renderer/**/*",
+      "package.json"
+    ]
   },
   "dependencies": {
-    "electron": "^33.0.0",
     "node-id3": "^0.2.6"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.8.1"
   }
 }
